@@ -8,6 +8,21 @@ abstract class Fee {
   double calculate(double gross);
 
   String get name => _name;
+
+  Map<String, dynamic> toMap();
+
+  static Fee fromJsonEntry(MapEntry<String, dynamic> entry) {
+    final data = entry.value as Map<String, dynamic>;
+    final isFlat = data['is_flat'] ?? false;
+
+    return isFlat
+        ? FlatFee.fromJsonEntry(entry)
+        : MultiplierFee.fromJsonEntry(entry);
+  }
+
+  static List<Fee> fromJson(Map<String, dynamic> json) {
+    return json.entries.map(Fee.fromJsonEntry).toList();
+  }
 }
 
 class MultiplierFee extends Fee {
@@ -26,6 +41,25 @@ class MultiplierFee extends Fee {
     return fee;
   }
 
+  static Fee fromJsonEntry(MapEntry<String, dynamic> feeEntry) {
+    final data = feeEntry.value as Map<String, dynamic>;
+    return MultiplierFee(feeEntry.key, data['amount'],
+        limit: data.containsKey('limit') ? data['limit'] : null);
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    final map = {
+      "amount": _multiplier,
+      "is_flat": false,
+    };
+
+    if (_limit != double.maxFinite) {
+      map["limit"] = _limit;
+    }
+
+    return {super._name: map};
+  }
 }
 
 class FlatFee extends Fee {
@@ -37,11 +71,26 @@ class FlatFee extends Fee {
   double calculate(double gross) {
     return _amount;
   }
+
+  static Fee fromJsonEntry(MapEntry<String, dynamic> feeEntry) {
+    final data = feeEntry.value as Map<String, dynamic>;
+    return FlatFee(
+      feeEntry.key,
+      data['amount'],
+    );
+  }
+
+  @override
+  Map<String, dynamic> toMap() => {
+        super._name: {'amount': _amount, 'is_flat': true}
+      };
 }
 
 extension FeeListExtension on List<Fee> {
   double totalFee(double gross) =>
       fold(0.0, (sum, fee) => sum + fee.calculate(gross));
-}
 
-extension JsonFeeConversion on Fee {}
+  Map<String, dynamic> toJson() {
+    return {for (final fee in this) ...fee.toMap()};
+  }
+}
