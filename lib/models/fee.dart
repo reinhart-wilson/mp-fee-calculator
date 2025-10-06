@@ -2,12 +2,14 @@ import 'dart:math';
 
 abstract class Fee {
   final String _name;
+  final bool _isMandatory;
 
-  Fee(this._name);
+  Fee(this._name, this._isMandatory);
 
   double calculate(double gross);
 
   String get name => _name;
+  bool get isMandatory => _isMandatory;
 
   Map<String, dynamic> toMap();
 
@@ -20,7 +22,7 @@ abstract class Fee {
         : MultiplierFee.fromJsonEntry(entry);
   }
 
-  static List<Fee> fromJson(Map<String, dynamic> json) {
+  static List<Fee> fromJson(Map<String, Map<String, dynamic>> json) {
     return json.entries.map(Fee.fromJsonEntry).toList();
   }
 }
@@ -29,7 +31,7 @@ class MultiplierFee extends Fee {
   final double _multiplier; // e.g. 0.1 for 10%
   final double _limit; // max fee after being multipled with price
 
-  MultiplierFee(super._name, this._multiplier,
+  MultiplierFee(super._name, super._isMandatory, this._multiplier,
       {double limit = double.maxFinite})
       : _limit = limit;
 
@@ -43,13 +45,19 @@ class MultiplierFee extends Fee {
 
   static Fee fromJsonEntry(MapEntry<String, dynamic> feeEntry) {
     final data = feeEntry.value as Map<String, dynamic>;
-    return MultiplierFee(feeEntry.key, data['amount'],
-        limit: data.containsKey('limit') ? data['limit'] : null);
+
+    if (data.containsKey('limit')) {
+      return MultiplierFee(feeEntry.key, data['is_mandatory'], data['amount'],
+          limit: data['limit']);
+    } else {
+      return MultiplierFee(feeEntry.key, data['is_mandatory'], data['amount']);
+    }
   }
 
   @override
   Map<String, dynamic> toMap() {
     final map = {
+      "is_mandatory": super._isMandatory,
       "amount": _multiplier,
       "is_flat": false,
     };
@@ -65,7 +73,7 @@ class MultiplierFee extends Fee {
 class FlatFee extends Fee {
   final double _amount;
 
-  FlatFee(super._name, this._amount);
+  FlatFee(super._name, super._isMandatory, this._amount);
 
   @override
   double calculate(double gross) {
@@ -76,13 +84,18 @@ class FlatFee extends Fee {
     final data = feeEntry.value as Map<String, dynamic>;
     return FlatFee(
       feeEntry.key,
+      data['is_mandatory'],
       data['amount'],
     );
   }
 
   @override
   Map<String, dynamic> toMap() => {
-        super._name: {'amount': _amount, 'is_flat': true}
+        super._name: {
+          'is_mandatory': _isMandatory,
+          'amount': _amount,
+          'is_flat': true
+        }
       };
 }
 
