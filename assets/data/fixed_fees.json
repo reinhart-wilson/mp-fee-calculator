@@ -1,0 +1,22 @@
+{
+    "tokopedia": {
+        "biaya_pemrosesan_order":{
+            "amount": 1250,
+            "is_flat": true,
+            "is_mandatory": true
+        }
+    },
+    "shopee": {
+        "promo_xtra": {
+            "amount": 0.02,
+            "limit": 20000,
+            "is_flat": false,
+            "is_mandatory": false
+        },
+        "biaya_pemrosesan_order":{
+            "amount": 1250,
+            "is_flat": true,
+            "is_mandatory": true
+        }
+    }
+}
