@@ -45,12 +45,13 @@ class MultiplierFee extends Fee {
 
   static Fee fromJsonEntry(MapEntry<String, dynamic> feeEntry) {
     final data = feeEntry.value as Map<String, dynamic>;
+    final amount = (data['amount'] as num).toDouble();
 
     if (data.containsKey('limit')) {
-      return MultiplierFee(feeEntry.key, data['is_mandatory'], data['amount'],
+      return MultiplierFee(feeEntry.key, data['is_mandatory'], amount,
           limit: data['limit']);
     } else {
-      return MultiplierFee(feeEntry.key, data['is_mandatory'], data['amount']);
+      return MultiplierFee(feeEntry.key, data['is_mandatory'], amount);
     }
   }
 
@@ -85,7 +86,7 @@ class FlatFee extends Fee {
     return FlatFee(
       feeEntry.key,
       data['is_mandatory'],
-      data['amount'],
+      (data['amount'] as num).toDouble(),
     );
   }
 
