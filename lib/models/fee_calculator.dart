@@ -15,11 +15,20 @@ class FeeCalculator {
     return gross - calculatedSum - flatSum;
   }
 
+  Map<String, double> calculateEachFee(double gross) {
+    final Map<String, double> result = {
+      for (var v in multiplierFees) v.name: v.calculate(gross),
+      for (var v in flatFees) v.name: v.calculate(gross),
+    };
+    return result;
+  }
+
   /// Use binary search to guess gross price between reasonable bounds:
   /// minGross = net + flatFee. This is a known minimum possible value
   /// maxGross = some large number, in this case 2 * net
   double calculateGross(double net) {
-    final flatFee = flatFees.totalFee(0); // 0 is a placeholder since flat fees do not depend on gross price
+    final flatFee = flatFees.totalFee(
+        0); // 0 is a placeholder since flat fees do not depend on gross price
 
     double minGross = net + flatFee;
     double maxGross = 2 * net;
