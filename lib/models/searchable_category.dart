@@ -15,14 +15,25 @@ class SearchableCategory {
     required this.fees,
   });
 
-  factory SearchableCategory.fromJson(Map<String, dynamic> json) =>
-      SearchableCategory(
-        label: json['label'],
-        catLv1: json['cat_lv1'],
-        catLv2: json['cat_lv2'],
-        catLv3: json['cat_lv3'],
-        fees: Fee.fromJson(json['fees'] as Map<String, dynamic>),
-      );
+  factory SearchableCategory.fromJson(Map<String, dynamic> json) {
+    final feesJson = json['fees'];
+    final fees = Fee.fromJson(
+      (feesJson as Map<String, dynamic>).map(
+        (key, value) => MapEntry(
+          key,
+          value as Map<String, dynamic>,
+        ),
+      ),
+    );
+
+    return SearchableCategory(
+      label: json['label'],
+      catLv1: json['cat_lv1'],
+      catLv2: json['cat_lv2'],
+      catLv3: json['cat_lv3'],
+      fees: fees,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         "label": label,
