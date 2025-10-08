@@ -4,6 +4,18 @@
             "amount": 1250,
             "is_flat": true,
             "is_mandatory": true
+        }, 
+        "xtra_boost_hari_biasa": {
+            "amount": 0.035,
+            "limit": 60000,
+            "is_flat": false,
+            "is_mandatory": false
+        },
+        "xtra_boost_hari_campaign": {
+            "amount": 0.045,
+            "limit": 60000,
+            "is_flat": false,
+            "is_mandatory": false
         }
     },
     "shopee": {
