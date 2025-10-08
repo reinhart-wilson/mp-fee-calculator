@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:mp_calculator/extensions/string_extensions.dart';
+
 abstract class Fee {
   final String _name;
   final bool _isMandatory;
@@ -13,6 +15,7 @@ abstract class Fee {
 
   Map<String, dynamic> toMap();
 
+  // Concrete methods
   static Fee fromJsonEntry(MapEntry<String, dynamic> entry) {
     final data = entry.value as Map<String, dynamic>;
     final isFlat = data['is_flat'] ?? false;
@@ -24,6 +27,11 @@ abstract class Fee {
 
   static List<Fee> fromJson(Map<String, Map<String, dynamic>> json) {
     return json.entries.map(Fee.fromJsonEntry).toList();
+  }
+
+  String get formattedName {
+    final capName = _name.split("_").map((word) => word.capitalize()).join(' ');
+    return '$capName${isMandatory ? '*' : ''}';
   }
 }
 
@@ -49,7 +57,7 @@ class MultiplierFee extends Fee {
 
     if (data.containsKey('limit')) {
       return MultiplierFee(feeEntry.key, data['is_mandatory'], amount,
-          limit: data['limit']);
+          limit: (data['limit'] as num).toDouble());
     } else {
       return MultiplierFee(feeEntry.key, data['is_mandatory'], amount);
     }
@@ -69,6 +77,20 @@ class MultiplierFee extends Fee {
 
     return {super._name: map};
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is MultiplierFee &&
+        other.name == name &&
+        other.limit == limit &&
+        other._multiplier == _multiplier;
+  }
+
+  @override
+  int get hashCode => Object.hash(name, limit, _multiplier);
+
+  @override
+  String toString() => '$name: $_multiplier / $_limit';
 }
 
 class FlatFee extends Fee {
@@ -98,6 +120,17 @@ class FlatFee extends Fee {
           'is_flat': true
         }
       };
+
+  @override
+  bool operator ==(Object other) {
+    return other is FlatFee && other.name == name && other._amount == _amount;
+  }
+
+  @override
+  int get hashCode => Object.hash(name, _amount);
+
+  @override
+  String toString() => '$name: $_amount';
 }
 
 extension FeeListExtension on List<Fee> {
@@ -106,5 +139,15 @@ extension FeeListExtension on List<Fee> {
 
   Map<String, dynamic> toJson() {
     return {for (final fee in this) ...fee.toMap()};
+  }
+
+  bool hasSimilarFee(Fee targetFee) {
+    return any((fee) => fee.name == targetFee.name);
+  }
+}
+
+extension FeeSetExtension on Set<Fee> {
+  bool hasSimilarFee(Fee targetFee) {
+    return any((fee) => fee.name == targetFee.name);
   }
 }
