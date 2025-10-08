@@ -1,3 +1,4 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mp_calculator/controllers/available_fees_provider.dart';
@@ -9,6 +10,7 @@ import 'package:mp_calculator/controllers/selected_category_provider.dart';
 import 'package:mp_calculator/controllers/selected_fee_names_provider.dart';
 import 'package:mp_calculator/models/marketplaces_enum.dart';
 import 'package:mp_calculator/models/category_node.dart';
+import 'package:mp_calculator/models/searchable_category.dart';
 
 class CalculatorFormScreen extends ConsumerWidget {
   const CalculatorFormScreen({super.key});
@@ -17,6 +19,9 @@ class CalculatorFormScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final marketplace = ref.watch(marketplaceFilterProvider);
     final categoryTreeAsync = ref.watch(categoryTreeProvider);
+    final searchableCategoryAsync = ref.watch(searchableCategoryProvider);
+    final selectedSearchableCategory =
+        ref.watch(selectedSearchableCategoryProvider);
     final categoryLv2 = ref.watch(categoryLv2Provider);
     final categoryLv3 = ref.watch(categoryLv3Provider);
     final selectedCategoryLv1 = ref.watch(selectedCategoryLv1NotifierProvider);
@@ -30,6 +35,7 @@ class CalculatorFormScreen extends ConsumerWidget {
         calculationMode == CalculationMode.grossToNet ? 'Net' : 'Gross';
     final inputPriceLabel =
         calculationMode == CalculationMode.grossToNet ? 'Gross' : 'Net';
+    ref.watch(categorySyncProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Marketplace Calculator')),
@@ -54,6 +60,32 @@ class CalculatorFormScreen extends ConsumerWidget {
                   child: Text(market.name),
                 );
               }).toList(),
+            ),
+            const SizedBox(height: 16),
+
+            searchableCategoryAsync.when(
+              data: (categories) => DropdownSearch<SearchableCategory>(
+                selectedItem: selectedSearchableCategory,
+                compareFn: (item1, item2) => item1.label == item2.label,
+                popupProps: const PopupProps.menu(
+                  showSearchBox: true,
+                  searchFieldProps: TextFieldProps(
+                    decoration: InputDecoration(
+                      labelText: 'Cari kategori...',
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                  ),
+                ),
+                itemAsString: (item) => item.label,
+                items: (f,cs) => categories,
+                onChanged: (selected) {
+                  ref
+                      .read(selectedSearchableCategoryProvider.notifier)
+                      .setCategory(selected);
+                },
+              ),
+              loading: () => const CircularProgressIndicator(),
+              error: (err, _) => Text('Error: $err'),
             ),
 
             const SizedBox(height: 16),
