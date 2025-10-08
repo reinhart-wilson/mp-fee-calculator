@@ -12,6 +12,7 @@ import 'package:mp_calculator/models/marketplaces_enum.dart';
 import 'package:mp_calculator/models/category_node.dart';
 import 'package:mp_calculator/models/searchable_category.dart';
 
+
 class CalculatorFormScreen extends ConsumerWidget {
   const CalculatorFormScreen({super.key});
 
@@ -38,175 +39,223 @@ class CalculatorFormScreen extends ConsumerWidget {
     ref.watch(categorySyncProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Marketplace Calculator')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Marketplace Dropdown
-            DropdownButton<Marketplaces>(
-              value: marketplace,
-              onChanged: (newValue) {
-                if (newValue != null) {
-                  ref
-                      .read(marketplaceFilterProvider.notifier)
-                      .setMarketplace(newValue);
-                }
-              },
-              items: Marketplaces.values.map((market) {
-                return DropdownMenuItem(
-                  value: market,
-                  child: Text(market.name),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-
-            searchableCategoryAsync.when(
-              data: (categories) => DropdownSearch<SearchableCategory>(
-                selectedItem: selectedSearchableCategory,
-                compareFn: (item1, item2) => item1.label == item2.label,
-                popupProps: const PopupProps.menu(
-                  showSearchBox: true,
-                  searchFieldProps: TextFieldProps(
-                    decoration: InputDecoration(
-                      labelText: 'Cari kategori...',
-                      prefixIcon: Icon(Icons.search),
-                    ),
+      appBar: AppBar(
+        title: const Text('Marketplace Calculator'),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _SectionCard(
+                title: 'Marketplace',
+                child: DropdownButtonFormField<Marketplaces>(
+                  value: marketplace,
+                  decoration: const InputDecoration(
+                    labelText: 'Select Marketplace',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12),
                   ),
+                  onChanged: (newValue) {
+                    if (newValue != null) {
+                      ref
+                          .read(marketplaceFilterProvider.notifier)
+                          .setMarketplace(newValue);
+                    }
+                  },
+                  items: Marketplaces.values.map((market) {
+                    return DropdownMenuItem(
+                      value: market,
+                      child: Text(market.name),
+                    );
+                  }).toList(),
                 ),
-                itemAsString: (item) => item.label,
-                items: (f,cs) => categories,
-                onChanged: (selected) {
-                  ref
-                      .read(selectedSearchableCategoryProvider.notifier)
-                      .setCategory(selected);
-                },
               ),
-              loading: () => const CircularProgressIndicator(),
-              error: (err, _) => Text('Error: $err'),
-            ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // Category Lv1 Dropdown
-            categoryTreeAsync.when(
-                data: (tree) {
-                  return CategoryDropdown(
-                      label: "Cat Lv1",
-                      selected: selectedCategoryLv1,
-                      options: tree,
-                      onChanged: (newLv1) {
-                        ref
-                            .read(selectedCategoryLv1NotifierProvider.notifier)
-                            .setCategory(newLv1);
+              _SectionCard(
+                title: 'Search Category',
+                child: searchableCategoryAsync.when(
+                  data: (categories) => DropdownSearch<SearchableCategory>(
+                    selectedItem: selectedSearchableCategory,
+                    compareFn: (a, b) => a.label == b.label,
+                    popupProps: const PopupProps.menu(
+                      showSearchBox: true,
+                      searchFieldProps: TextFieldProps(
+                        decoration: InputDecoration(
+                          labelText: 'Cari kategori...',
+                          prefixIcon: Icon(Icons.search),
+                        ),
+                      ),
+                    ),
+                    itemAsString: (item) => item.label,
+                    items: (f, cs) => categories,
+                    decoratorProps: const DropDownDecoratorProps(
+                      decoration: InputDecoration(
+                        labelText: 'Searchable Category',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    onChanged: (selected) {
+                      ref
+                          .read(selectedSearchableCategoryProvider.notifier)
+                          .setCategory(selected);
+                    },
+                  ),
+                  loading: () => const Center(
+                      child: Padding(
+                          padding: EdgeInsets.all(8),
+                          child: CircularProgressIndicator())),
+                  error: (err, _) => Text('Error: $err'),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              _SectionCard(
+                title: 'Category Hierarchy',
+                child: Column(
+                  children: [
+                    categoryTreeAsync.when(
+                      data: (tree) => CategoryDropdown(
+                        label: "Category Level 1",
+                        selected: selectedCategoryLv1,
+                        options: tree,
+                        onChanged: (newLv1) {
+                          ref
+                              .read(selectedCategoryLv1NotifierProvider.notifier)
+                              .setCategory(newLv1);
+                          ref
+                              .read(selectedCategoryLv2NotifierProvider.notifier)
+                              .clear();
+                          ref
+                              .read(selectedCategoryLv3NotifierProvider.notifier)
+                              .clear();
+                        },
+                      ),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (err, _) =>
+                          Text('Error loading categories: $err'),
+                    ),
+                    const SizedBox(height: 12),
+                    CategoryDropdown(
+                      label: "Category Level 2",
+                      selected: selectedCategoryLv2,
+                      options: categoryLv2,
+                      onChanged: (node) {
                         ref
                             .read(selectedCategoryLv2NotifierProvider.notifier)
-                            .clear();
+                            .setCategory(node);
                         ref
                             .read(selectedCategoryLv3NotifierProvider.notifier)
                             .clear();
-                      });
-                },
-                loading: () => const CircularProgressIndicator(),
-                error: (err, _) => Text('Error loading categories: $err')),
-
-            CategoryDropdown(
-                label: "Cat Lv2",
-                selected: selectedCategoryLv2,
-                options: categoryLv2,
-                onChanged: (node) {
-                  ref
-                      .read(selectedCategoryLv2NotifierProvider.notifier)
-                      .setCategory(node);
-                  ref
-                      .read(selectedCategoryLv3NotifierProvider.notifier)
-                      .clear();
-                }),
-
-            CategoryDropdown(
-                label: "Cat Lv3",
-                selected: selectedCategoryLv3,
-                options: categoryLv3,
-                onChanged: (node) {
-                  ref
-                      .read(selectedCategoryLv3NotifierProvider.notifier)
-                      .setCategory(node);
-                }),
-
-            const SizedBox(height: 16),
-
-            // Fee Checkboxes (from selected category)
-            if (selectedCategoryLv1 != null)
-              Wrap(
-                spacing: 8,
-                children: availableFees.map((fee) {
-                  return FilterChip(
-                    label: Text(fee.formattedName),
-                    selected: selectedFeesNameState.contains(fee.name),
-                    onSelected: (selected) {
-                      ref
-                          .read(selectedFeeNamesProvider.notifier)
-                          .toggle(fee.name);
-                    },
-                  );
-                }).toList(),
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    CategoryDropdown(
+                      label: "Category Level 3",
+                      selected: selectedCategoryLv3,
+                      options: categoryLv3,
+                      onChanged: (node) {
+                        ref
+                            .read(selectedCategoryLv3NotifierProvider.notifier)
+                            .setCategory(node);
+                      },
+                    ),
+                  ],
+                ),
               ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // Base Price Input
-            TextField(
-              decoration: InputDecoration(labelText: '$inputPriceLabel Price'),
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                final price = double.tryParse(value) ?? 0.0;
-                ref.read(basePriceProvider.notifier).setBasePrice(price);
-              },
-            ),
+              if (selectedCategoryLv1 != null)
+                _SectionCard(
+                  title: 'Applicable Fees',
+                  child: availableFees.isEmpty
+                      ? const Text('No applicable fees for this category.')
+                      : Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: availableFees.map((fee) {
+                            return FilterChip(
+                              label: Text(fee.formattedName),
+                              selected:
+                                  selectedFeesNameState.contains(fee.name),
+                              onSelected: (selected) {
+                                ref
+                                    .read(selectedFeeNamesProvider.notifier)
+                                    .toggle(fee.name);
+                              },
+                            );
+                          }).toList(),
+                        ),
+                ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // Net Price
-            Text(
-              '$calculatedPriceLabel Price: ${calculatedPrice.toStringAsFixed(2)}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-
-            // Toggle calculation mode
-            SegmentedButton<CalculationMode>(
-              segments: const <ButtonSegment<CalculationMode>>[
-                ButtonSegment(
-                    value: CalculationMode.netToGross,
-                    label: Text('Net → Gross')),
-                ButtonSegment(
-                    value: CalculationMode.grossToNet,
-                    label: Text('Gross → Net')),
-              ],
-              selected: <CalculationMode>{calculationMode},
-              onSelectionChanged: (Set<CalculationMode> newSelection) {
-                final selected = newSelection.first;
-                if (selected != calculationMode) {
-                  ref.read(calculationModeProvider.notifier).setMode(selected);
-                }
-              },
-            ),
-
-            // Fee Breakdown
-            // Text('Applied Fees:'),
-            // ...selectedFees.map((fee) => Text(
-            //     '${fee.name}: ${fee.calculate(basePrice).toStringAsFixed(2)}')),
-
-            // const SizedBox(height: 16),
-          ],
+              _SectionCard(
+                title: 'Calculation',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      decoration:
+                          InputDecoration(labelText: '$inputPriceLabel Price'),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        final price = double.tryParse(value) ?? 0.0;
+                        ref
+                            .read(basePriceProvider.notifier)
+                            .setBasePrice(price);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '$calculatedPriceLabel Price: ${calculatedPrice.toStringAsFixed(2)}',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: SegmentedButton<CalculationMode>(
+                        segments: const [
+                          ButtonSegment(
+                              value: CalculationMode.netToGross,
+                              label: Text('Net → Gross')),
+                          ButtonSegment(
+                              value: CalculationMode.grossToNet,
+                              label: Text('Gross → Net')),
+                        ],
+                        selected: {calculationMode},
+                        onSelectionChanged:
+                            (Set<CalculationMode> newSelection) {
+                          final selected = newSelection.first;
+                          if (selected != calculationMode) {
+                            ref
+                                .read(calculationModeProvider.notifier)
+                                .setMode(selected);
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class CategoryDropdown extends ConsumerWidget {
+class CategoryDropdown extends StatelessWidget {
   final String label;
   final CategoryNode? selected;
   final Map<String, CategoryNode>? options;
@@ -221,21 +270,53 @@ class CategoryDropdown extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (options == null || options!.isEmpty) {
-      return const SizedBox.shrink();
-    }
+  Widget build(BuildContext context) {
+    if (options == null || options!.isEmpty) return const SizedBox.shrink();
 
-    return DropdownButton<CategoryNode>(
+    return DropdownButtonFormField<CategoryNode>(
       value: selected,
-      hint: Text(label),
-      items: options!.values.map((node) {
-        return DropdownMenuItem(
-          value: node,
-          child: Text(node.name),
-        );
-      }).toList(),
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      items: options!.values
+          .map((node) => DropdownMenuItem(
+                value: node,
+                child: Text(node.name),
+              ))
+          .toList(),
       onChanged: onChanged,
+    );
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final Widget child;
+
+  const _SectionCard({required this.title, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
+            child,
+          ],
+        ),
+      ),
     );
   }
 }
