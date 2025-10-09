@@ -18,7 +18,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Marketplace Calculator',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.teal, // Your custom base color
+          brightness: Brightness.light,
+        ),
+        useMaterial3: true,
       ),
       home: const CalculatorFormScreen(),
     );
