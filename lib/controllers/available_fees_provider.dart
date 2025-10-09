@@ -16,5 +16,5 @@ final availableFeesProvider = Provider<List<Fee>>((ref) {
   final categoryFees = fees ?? [];
 
   // Combine both
-  return [...fixedFees, ...categoryFees];
+  return [ ...categoryFees, ...fixedFees,];
 });
