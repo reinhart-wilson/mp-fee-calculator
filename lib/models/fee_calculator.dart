@@ -27,11 +27,11 @@ class FeeCalculator {
   /// minGross = net + flatFee. This is a known minimum possible value
   /// maxGross = some large number, in this case 2 * net
   double calculateGross(double net) {
-    final flatFee = flatFees.totalFee(
-        0); // 0 is a placeholder since flat fees do not depend on gross price
+    // 0 is a placeholder since flat fees do not depend on gross price
+    final flatFee = flatFees.totalFee(0);
 
     double minGross = net + flatFee;
-    double maxGross = 2 * net;
+    double maxGross = 3 * (net < flatFee ? flatFee : net); // Optimizing calculation efficiency in case item price is less than total flat fee
     double midGross = 0;
     const epsilon = 0.0001;
 
