@@ -1,320 +1,47 @@
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mp_calculator/controllers/available_fees_provider.dart';
-import 'package:mp_calculator/controllers/base_price_provider.dart';
-import 'package:mp_calculator/controllers/calculated_price_provider.dart';
-import 'package:mp_calculator/controllers/category_data_providers.dart';
-import 'package:mp_calculator/controllers/marketplace_filter_provider.dart';
 import 'package:mp_calculator/controllers/selected_category_provider.dart';
-import 'package:mp_calculator/controllers/selected_fee_names_provider.dart';
-import 'package:mp_calculator/models/marketplaces_enum.dart';
-import 'package:mp_calculator/models/category_node.dart';
-import 'package:mp_calculator/models/searchable_category.dart';
-
+import 'package:mp_calculator/themes/app_sizes.dart';
+import 'package:mp_calculator/views/widgets/calculation_section.dart';
+import 'package:mp_calculator/views/widgets/category_section.dart';
+import 'package:mp_calculator/views/widgets/marketplace_selector_section.dart';
 
 class CalculatorFormScreen extends ConsumerWidget {
   const CalculatorFormScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final marketplace = ref.watch(marketplaceFilterProvider);
-    final categoryTreeAsync = ref.watch(categoryTreeProvider);
-    final searchableCategoryAsync = ref.watch(searchableCategoryProvider);
-    final selectedSearchableCategory =
-        ref.watch(selectedSearchableCategoryProvider);
-    final categoryLv2 = ref.watch(categoryLv2Provider);
-    final categoryLv3 = ref.watch(categoryLv3Provider);
-    final selectedCategoryLv1 = ref.watch(selectedCategoryLv1NotifierProvider);
-    final selectedCategoryLv2 = ref.watch(selectedCategoryLv2NotifierProvider);
-    final selectedCategoryLv3 = ref.watch(selectedCategoryLv3NotifierProvider);
-    final availableFees = ref.watch(availableFeesProvider);
-    final selectedFeesNameState = ref.watch(selectedFeeNamesProvider);
-    final calculationMode = ref.watch(calculationModeProvider);
-    final calculatedPrice = ref.watch(calculatedPriceProvider);
-    final calculatedPriceLabel =
-        calculationMode == CalculationMode.grossToNet ? 'Net' : 'Gross';
-    final inputPriceLabel =
-        calculationMode == CalculationMode.grossToNet ? 'Gross' : 'Net';
     ref.watch(categorySyncProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Marketplace Calculator'),
+        title: Text(
+          'Marketplace Calculator',
+          style: Theme.of(context)
+              .textTheme
+              .displaySmall
+              ?.copyWith(color: Theme.of(context).colorScheme.primary),
+        ),
         centerTitle: true,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _SectionCard(
-                title: 'Marketplace',
-                child: DropdownButtonFormField<Marketplaces>(
-                  value: marketplace,
-                  decoration: const InputDecoration(
-                    labelText: 'Select Marketplace',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                  ),
-                  onChanged: (newValue) {
-                    if (newValue != null) {
-                      ref
-                          .read(marketplaceFilterProvider.notifier)
-                          .setMarketplace(newValue);
-                    }
-                  },
-                  items: Marketplaces.values.map((market) {
-                    return DropdownMenuItem(
-                      value: market,
-                      child: Text(market.name),
-                    );
-                  }).toList(),
-                ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  MarketplaceSelectorSection(),
+                  SizedBox(height: AppSizes.paddingSmall),
+                  CategorySection(),
+                  SizedBox(height: AppSizes.paddingSmall),
+                  CalculationSection(),
+                ],
               ),
-
-              const SizedBox(height: 16),
-
-              _SectionCard(
-                title: 'Search Category',
-                child: searchableCategoryAsync.when(
-                  data: (categories) => DropdownSearch<SearchableCategory>(
-                    selectedItem: selectedSearchableCategory,
-                    compareFn: (a, b) => a.label == b.label,
-                    popupProps: const PopupProps.menu(
-                      showSearchBox: true,
-                      searchFieldProps: TextFieldProps(
-                        decoration: InputDecoration(
-                          labelText: 'Cari kategori...',
-                          prefixIcon: Icon(Icons.search),
-                        ),
-                      ),
-                    ),
-                    itemAsString: (item) => item.label,
-                    items: (f, cs) => categories,
-                    decoratorProps: const DropDownDecoratorProps(
-                      decoration: InputDecoration(
-                        labelText: 'Searchable Category',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    onChanged: (selected) {
-                      ref
-                          .read(selectedSearchableCategoryProvider.notifier)
-                          .setCategory(selected);
-                    },
-                  ),
-                  loading: () => const Center(
-                      child: Padding(
-                          padding: EdgeInsets.all(8),
-                          child: CircularProgressIndicator())),
-                  error: (err, _) => Text('Error: $err'),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              _SectionCard(
-                title: 'Category Hierarchy',
-                child: Column(
-                  children: [
-                    categoryTreeAsync.when(
-                      data: (tree) => CategoryDropdown(
-                        label: "Category Level 1",
-                        selected: selectedCategoryLv1,
-                        options: tree,
-                        onChanged: (newLv1) {
-                          ref
-                              .read(selectedCategoryLv1NotifierProvider.notifier)
-                              .setCategory(newLv1);
-                          ref
-                              .read(selectedCategoryLv2NotifierProvider.notifier)
-                              .clear();
-                          ref
-                              .read(selectedCategoryLv3NotifierProvider.notifier)
-                              .clear();
-                        },
-                      ),
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (err, _) =>
-                          Text('Error loading categories: $err'),
-                    ),
-                    const SizedBox(height: 12),
-                    CategoryDropdown(
-                      label: "Category Level 2",
-                      selected: selectedCategoryLv2,
-                      options: categoryLv2,
-                      onChanged: (node) {
-                        ref
-                            .read(selectedCategoryLv2NotifierProvider.notifier)
-                            .setCategory(node);
-                        ref
-                            .read(selectedCategoryLv3NotifierProvider.notifier)
-                            .clear();
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    CategoryDropdown(
-                      label: "Category Level 3",
-                      selected: selectedCategoryLv3,
-                      options: categoryLv3,
-                      onChanged: (node) {
-                        ref
-                            .read(selectedCategoryLv3NotifierProvider.notifier)
-                            .setCategory(node);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              if (selectedCategoryLv1 != null)
-                _SectionCard(
-                  title: 'Applicable Fees',
-                  child: availableFees.isEmpty
-                      ? const Text('No applicable fees for this category.')
-                      : Wrap(
-                          spacing: 8,
-                          runSpacing: 4,
-                          children: availableFees.map((fee) {
-                            return FilterChip(
-                              label: Text(fee.formattedName),
-                              selected:
-                                  selectedFeesNameState.contains(fee.name),
-                              onSelected: (selected) {
-                                ref
-                                    .read(selectedFeeNamesProvider.notifier)
-                                    .toggle(fee.name);
-                              },
-                            );
-                          }).toList(),
-                        ),
-                ),
-
-              const SizedBox(height: 16),
-
-              _SectionCard(
-                title: 'Calculation',
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      decoration:
-                          InputDecoration(labelText: '$inputPriceLabel Price'),
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) {
-                        final price = double.tryParse(value) ?? 0.0;
-                        ref
-                            .read(basePriceProvider.notifier)
-                            .setBasePrice(price);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '$calculatedPriceLabel Price: ${calculatedPrice.toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                    ),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: SegmentedButton<CalculationMode>(
-                        segments: const [
-                          ButtonSegment(
-                              value: CalculationMode.netToGross,
-                              label: Text('Net → Gross')),
-                          ButtonSegment(
-                              value: CalculationMode.grossToNet,
-                              label: Text('Gross → Net')),
-                        ],
-                        selected: {calculationMode},
-                        onSelectionChanged:
-                            (Set<CalculationMode> newSelection) {
-                          final selected = newSelection.first;
-                          if (selected != calculationMode) {
-                            ref
-                                .read(calculationModeProvider.notifier)
-                                .setMode(selected);
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class CategoryDropdown extends StatelessWidget {
-  final String label;
-  final CategoryNode? selected;
-  final Map<String, CategoryNode>? options;
-  final void Function(CategoryNode?) onChanged;
-
-  const CategoryDropdown({
-    super.key,
-    required this.label,
-    required this.selected,
-    required this.options,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (options == null || options!.isEmpty) return const SizedBox.shrink();
-
-    return DropdownButtonFormField<CategoryNode>(
-      value: selected,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-      items: options!.values
-          .map((node) => DropdownMenuItem(
-                value: node,
-                child: Text(node.name),
-              ))
-          .toList(),
-      onChanged: onChanged,
-    );
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  final String title;
-  final Widget child;
-
-  const _SectionCard({required this.title, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 12),
-            child,
-          ],
         ),
       ),
     );
