@@ -1,6 +1,6 @@
 {
-    "name": "Marketplace Calculator",
-    "short_name": "MP Calc",
+    "name": "mp_calculator",
+    "short_name": "mp_calculator",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
