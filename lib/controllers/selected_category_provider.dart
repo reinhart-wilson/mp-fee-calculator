@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mp_calculator/controllers/category_data_providers.dart';
+import 'package:mp_calculator/controllers/marketplace_filter_provider.dart';
 import 'package:mp_calculator/models/category_node.dart';
+import 'package:mp_calculator/models/marketplaces_enum.dart';
 import 'package:mp_calculator/models/searchable_category.dart';
 
 class SelectedCategoryNotifier extends Notifier<CategoryNode?> {
@@ -74,6 +76,21 @@ final categorySyncProvider = Provider<void>((ref) {
       ref.read(selectedCategoryLv1NotifierProvider.notifier).setCategory(lv1);
       ref.read(selectedCategoryLv2NotifierProvider.notifier).setCategory(lv2);
       ref.read(selectedCategoryLv3NotifierProvider.notifier).setCategory(lv3);
+    },
+  );
+});
+
+final marketplaceSyncProvider = Provider<void>((ref) {
+  ref.listen<Marketplaces?>(
+    marketplaceFilterProvider,
+    (prev, next) async {
+      if (next != prev) {
+        ref.read(selectedCategoryLv1NotifierProvider.notifier).clear();
+        ref.read(selectedCategoryLv2NotifierProvider.notifier).clear();
+        ref.read(selectedCategoryLv3NotifierProvider.notifier).clear();
+        ref.read(selectedSearchableCategoryProvider.notifier).clear();
+        return;
+      }
     },
   );
 });
