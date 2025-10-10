@@ -1,34 +1,42 @@
 {
     "tokopedia": {
-        "biaya_pemrosesan_order":{
+        "biaya_pemrosesan_order": {
             "amount": 1250,
             "is_flat": true,
             "is_mandatory": true
-        }, 
+        },
         "xtra_boost_hari_biasa": {
             "amount": 0.035,
             "limit": 60000,
             "is_flat": false,
-            "is_mandatory": false
+            "is_mandatory": false,
+            "group": "XBP"
         },
         "xtra_boost_hari_campaign": {
             "amount": 0.045,
             "limit": 60000,
             "is_flat": false,
-            "is_mandatory": false
+            "is_mandatory": false,
+            "group": "XBP"
         }
     },
     "shopee": {
+        "biaya_proses_pesanan": {
+            "amount": 1250,
+            "is_flat": true,
+            "is_mandatory": true
+        },
         "promo_xtra": {
             "amount": 0.02,
             "limit": 20000,
             "is_flat": false,
             "is_mandatory": false
         },
-        "biaya_pemrosesan_order":{
-            "amount": 1250,
-            "is_flat": true,
-            "is_mandatory": true
+        "live_xtra": {
+            "amount": 0.03,
+            "limit": 20000,
+            "is_flat": false,
+            "is_mandatory": false
         }
     }
 }

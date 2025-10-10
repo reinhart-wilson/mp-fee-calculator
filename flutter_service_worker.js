@@ -3,10 +3,11 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"assets/AssetManifest.bin": "87dc56100e0c29a959512eccf7f9b792",
-"assets/AssetManifest.bin.json": "4be4aad8fb73340c8b0d5aa1cd490ceb",
-"assets/AssetManifest.json": "3479b20a5383ae04a620d04c3e312689",
-"assets/assets/data/fixed_fees.json": "6c44ffdc37371bb7369b832f2cd4e22b",
+const RESOURCES = {"assets/AssetManifest.bin": "92effd417205774a2f3fd33780395077",
+"assets/AssetManifest.bin.json": "66ff627266a8b781a267f1a0d57dbd5a",
+"assets/AssetManifest.json": "c145bd6e06bdb054d4008286174bbf9a",
+"assets/assets/data/fixed_fees.json": "63c8003498ba752d041e1e4bc0c84c47",
+"assets/assets/data/shopee.json": "cb59dba23b9fbb59fcaced99d439a8a9",
 "assets/assets/data/tokopedia.json": "5fcca43458572fd5a5c9284c409be342",
 "assets/FontManifest.json": "dc3d03800ccca4601324923c0b1d6d57",
 "assets/fonts/MaterialIcons-Regular.otf": "73bd80bee2af612c6b79fa6d8bdbc7a7",
@@ -25,14 +26,14 @@ const RESOURCES = {"assets/AssetManifest.bin": "87dc56100e0c29a959512eccf7f9b792
 "canvaskit/skwasm.worker.js": "89990e8c92bcb123999aa81f7e203b1c",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "flutter.js": "f393d3c16b631f36852323de8e583132",
-"flutter_bootstrap.js": "a8996d5e5a59ae61bee4365deaeaf957",
+"flutter_bootstrap.js": "d74ee3272fe0eefb440be1b46e9f95ee",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
 "icons/Icon-maskable-192.png": "c457ef57daa1d16f64b27b786ec2ea3c",
 "icons/Icon-maskable-512.png": "301a7604d45b3e739efc881eb04896ea",
 "index.html": "5f3fc389cc7171bd87a29aefc7a0c7e2",
 "/": "5f3fc389cc7171bd87a29aefc7a0c7e2",
-"main.dart.js": "64e9bb47037462eaefff09354c7c0370",
+"main.dart.js": "aee2c900e767d8666192fe01d004164f",
 "manifest.json": "d30e026668a29d222997c4fb4a4d4413",
 "version.json": "b3d7e93f9fdd42741f3d6bae082525b0"};
 // The application shell files that are downloaded before a service worker can
