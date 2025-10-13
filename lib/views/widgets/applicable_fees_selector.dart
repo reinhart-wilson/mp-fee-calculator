@@ -22,14 +22,18 @@ class ApplicableFeesSelector extends ConsumerWidget {
                 spacing: 8,
                 runSpacing: 4,
                 children: availableFees.map((fee) {
-                  return FilterChip(
-                    label: Text(fee.formattedName),
-                    selected: selectedFeesNameState.contains(fee.name),
-                    onSelected: (selected) {
-                      ref
-                          .read(selectedFeeNamesProvider.notifier)
-                          .toggle(fee.name);
-                    },
+                  return Tooltip(
+                    message: fee.hint,
+                    waitDuration: const Duration(milliseconds: 300),
+                    child: FilterChip(
+                      label: Text(fee.formattedName),
+                      selected: selectedFeesNameState.contains(fee.name),
+                      onSelected: (selected) {
+                        ref
+                            .read(selectedFeeNamesProvider.notifier)
+                            .toggle(fee.name);
+                      },
+                    ),
                   );
                 }).toList(),
               ),

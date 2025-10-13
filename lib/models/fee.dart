@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:mp_calculator/extensions/string_extensions.dart';
+import 'package:mp_calculator/utils/formatter.dart';
 
 abstract class Fee {
   final String _name;
@@ -33,6 +34,8 @@ abstract class Fee {
     final capName = _name.split("_").map((word) => word.capitalize()).join(' ');
     return '$capName${isMandatory ? '*' : ''}';
   }
+
+  String get hint;
 }
 
 class MultiplierFee extends Fee {
@@ -90,7 +93,12 @@ class MultiplierFee extends Fee {
   int get hashCode => Object.hash(name, limit, _multiplier);
 
   @override
-  String toString() => '$name: $_multiplier / $_limit';
+  String get hint {
+    final suffix = _limit == double.maxFinite
+        ? ''
+        : ', max ${formatCurrency(_limit, shorten: true)}';
+    return '${formatPercentage(_multiplier)} of gross price$suffix';
+  }
 }
 
 class FlatFee extends Fee {
@@ -130,7 +138,7 @@ class FlatFee extends Fee {
   int get hashCode => Object.hash(name, _amount);
 
   @override
-  String toString() => '$name: $_amount';
+  String get hint => '${formatCurrency(_amount)} flat';
 }
 
 extension FeeListExtension on List<Fee> {
