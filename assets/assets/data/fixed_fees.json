@@ -26,6 +26,11 @@
             "is_flat": true,
             "is_mandatory": true
         },
+        "asuransi_pengiriman":{
+            "amount": 0.005
+            "is_flat": false,
+            "is_mandatory": false
+        },
         "promo_xtra": {
             "amount": 0.02,
             "limit": 20000,
