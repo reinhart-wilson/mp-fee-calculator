@@ -27,7 +27,7 @@
             "is_mandatory": true
         },
         "asuransi_pengiriman":{
-            "amount": 0.005
+            "amount": 0.005,
             "is_flat": false,
             "is_mandatory": false
         },
