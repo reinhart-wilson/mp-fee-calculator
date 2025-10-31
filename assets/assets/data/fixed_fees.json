@@ -32,8 +32,8 @@
             "is_mandatory": false
         },
         "promo_xtra": {
-            "amount": 0.02,
-            "limit": 20000,
+            "amount": 0.045,
+            "limit": 60000,
             "is_flat": false,
             "is_mandatory": false
         },
