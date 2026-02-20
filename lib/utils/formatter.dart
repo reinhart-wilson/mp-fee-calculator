@@ -48,3 +48,24 @@ String formatCurrency(
 
   return formatted;
 }
+
+DateTime stringToDateTime(
+  String? dateStr, {
+  String inputFormat = "dd-MM-yyyy",
+}) {
+  if (dateStr == null || dateStr.isEmpty) {
+    throw Exception('Date');
+  }
+  if (inputFormat.toLowerCase() == "iso") {
+    return DateTime.parse(dateStr);
+  }
+  return DateFormat(inputFormat).parse(dateStr);
+}
+
+String? dateTimeToString(
+  DateTime? date, {
+  String outputFormat = "dd/MM/yyyy",
+}) {
+  if (date == null) return null;
+  return DateFormat(outputFormat).format(date); // Using a common format
+}

@@ -4,6 +4,7 @@ import 'package:mp_calculator/models/category_node.dart';
 import 'package:mp_calculator/models/fee.dart';
 import 'package:mp_calculator/models/marketplaces_enum.dart';
 import 'package:mp_calculator/models/searchable_category.dart';
+import 'package:mp_calculator/models/update_model.dart';
 
 Future<Map<String, CategoryNode>> loadCategoryTree(Marketplaces mp) async {
   final jsonString = await rootBundle.loadString('assets/data/${mp.name}.json');
@@ -47,4 +48,15 @@ Future<List<Fee>> loadFixedFees(Marketplaces mp) async {
       ));
 
   return Fee.fromJson(mpFeesMap);
+}
+
+Future<List<UpdateModel>> loadUpdates() async {
+  final jsonString = await rootBundle.loadString('assets/data/changelog.json');
+  final List<dynamic> rawList = jsonDecode(jsonString);
+
+  final decoded = rawList
+      .map((e) => UpdateModel.fromJson(e as Map<String, dynamic>))
+      .toList();
+
+  return decoded;
 }

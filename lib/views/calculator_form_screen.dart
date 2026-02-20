@@ -4,6 +4,7 @@ import 'package:mp_calculator/controllers/selected_category_provider.dart';
 import 'package:mp_calculator/themes/app_sizes.dart';
 import 'package:mp_calculator/views/widgets/calculation_section.dart';
 import 'package:mp_calculator/views/widgets/category_section.dart';
+import 'package:mp_calculator/views/widgets/footer_section.dart';
 import 'package:mp_calculator/views/widgets/marketplace_selector_section.dart';
 
 class CalculatorFormScreen extends ConsumerWidget {
@@ -39,6 +40,8 @@ class CalculatorFormScreen extends ConsumerWidget {
                   CategorySection(),
                   SizedBox(height: AppSizes.paddingSmall),
                   CalculationSection(),
+                  SizedBox(height: AppSizes.paddingMedium),
+                  FooterSection()
                 ],
               ),
             ),
