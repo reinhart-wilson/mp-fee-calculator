@@ -12,7 +12,7 @@ class CalculatorFormScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(categorySyncProvider);
+    // ref.watch(categorySyncProvider);
     ref.watch(marketplaceSyncProvider);
 
     return Scaffold(

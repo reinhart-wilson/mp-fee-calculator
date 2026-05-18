@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mp_calculator/services/shared_preferences_service.dart';
 import 'package:mp_calculator/views/calculator_form_screen.dart'; // adjust path if needed
 
-void main() {
+void main() async {
+  await SharedPreferencesService.init();
   runApp(
     const ProviderScope(
       child: MyApp(),

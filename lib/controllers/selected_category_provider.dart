@@ -4,6 +4,7 @@ import 'package:mp_calculator/controllers/marketplace_filter_provider.dart';
 import 'package:mp_calculator/models/category_node.dart';
 import 'package:mp_calculator/models/marketplaces_enum.dart';
 import 'package:mp_calculator/models/searchable_category.dart';
+import 'package:mp_calculator/services/shared_preferences_service.dart';
 
 class SelectedCategoryNotifier extends Notifier<CategoryNode?> {
   @override
@@ -42,14 +43,59 @@ final categoryLv3Provider = Provider<Map<String, CategoryNode>?>((ref) {
 
 class SelectedSearchableCategoryNotifier extends Notifier<SearchableCategory?> {
   @override
-  SearchableCategory? build() => null;
+  SearchableCategory? build() {
+    final cachedCategory =
+        SharedPreferencesService.instance.getSelectedCategory();
+
+    // Workaround untuk startup initialization:
+    if (cachedCategory != null) {
+      // Menggunakan Future.microtask agar tidak mengganggu siklus build Riverpod
+      Future.microtask(() async {
+        final tree = await ref.read(categoryTreeProvider.future);
+        final lv1 = tree[cachedCategory.catLv1];
+        final lv2 = lv1?.children[cachedCategory.catLv2];
+        final lv3 = lv2?.children[cachedCategory.catLv3];
+
+        ref.read(selectedCategoryLv1NotifierProvider.notifier).setCategory(lv1);
+        ref.read(selectedCategoryLv2NotifierProvider.notifier).setCategory(lv2);
+        ref.read(selectedCategoryLv3NotifierProvider.notifier).setCategory(lv3);
+      });
+    }
+
+    return cachedCategory;
+  }
 
   setCategory(SearchableCategory? cat) {
+    SharedPreferencesService.instance.setSelectedCategory(cat);
     state = cat;
+    // Sinkronisasi manual saat user memilih kategori baru
+    _syncCategories(cat);
   }
 
   clear() {
-    state = build();
+    SharedPreferencesService.instance
+        .setSelectedCategory(null); // Jangan lupa clear di SP juga
+    state = null;
+    _syncCategories(null);
+  }
+
+  // Pindahkan logika sinkronisasi ke dalam method internal notifier agar reusable
+  void _syncCategories(SearchableCategory? next) async {
+    if (next == null) {
+      ref.read(selectedCategoryLv1NotifierProvider.notifier).clear();
+      ref.read(selectedCategoryLv2NotifierProvider.notifier).clear();
+      ref.read(selectedCategoryLv3NotifierProvider.notifier).clear();
+      return;
+    }
+
+    final tree = await ref.read(categoryTreeProvider.future);
+    final lv1 = tree[next.catLv1];
+    final lv2 = lv1?.children[next.catLv2];
+    final lv3 = lv2?.children[next.catLv3];
+
+    ref.read(selectedCategoryLv1NotifierProvider.notifier).setCategory(lv1);
+    ref.read(selectedCategoryLv2NotifierProvider.notifier).setCategory(lv2);
+    ref.read(selectedCategoryLv3NotifierProvider.notifier).setCategory(lv3);
   }
 }
 
@@ -57,28 +103,28 @@ final selectedSearchableCategoryProvider =
     NotifierProvider<SelectedSearchableCategoryNotifier, SearchableCategory?>(
         SelectedSearchableCategoryNotifier.new);
 
-final categorySyncProvider = Provider<void>((ref) {
-  ref.listen<SearchableCategory?>(
-    selectedSearchableCategoryProvider,
-    (prev, next) async {
-      if (next == null) {
-        ref.read(selectedCategoryLv1NotifierProvider.notifier).clear();
-        ref.read(selectedCategoryLv2NotifierProvider.notifier).clear();
-        ref.read(selectedCategoryLv3NotifierProvider.notifier).clear();
-        return;
-      }
+// final categorySyncProvider = Provider<void>((ref) {
+//   ref.listen<SearchableCategory?>(
+//     selectedSearchableCategoryProvider,
+//     (prev, next) async {
+//       if (next == null) {
+//         ref.read(selectedCategoryLv1NotifierProvider.notifier).clear();
+//         ref.read(selectedCategoryLv2NotifierProvider.notifier).clear();
+//         ref.read(selectedCategoryLv3NotifierProvider.notifier).clear();
+//         return;
+//       }
 
-      final tree = await ref.read(categoryTreeProvider.future);
-      final lv1 = tree[next.catLv1];
-      final lv2 = lv1?.children[next.catLv2];
-      final lv3 = lv2?.children[next.catLv3];
+//       final tree = await ref.read(categoryTreeProvider.future);
+//       final lv1 = tree[next.catLv1];
+//       final lv2 = lv1?.children[next.catLv2];
+//       final lv3 = lv2?.children[next.catLv3];
 
-      ref.read(selectedCategoryLv1NotifierProvider.notifier).setCategory(lv1);
-      ref.read(selectedCategoryLv2NotifierProvider.notifier).setCategory(lv2);
-      ref.read(selectedCategoryLv3NotifierProvider.notifier).setCategory(lv3);
-    },
-  );
-});
+//       ref.read(selectedCategoryLv1NotifierProvider.notifier).setCategory(lv1);
+//       ref.read(selectedCategoryLv2NotifierProvider.notifier).setCategory(lv2);
+//       ref.read(selectedCategoryLv3NotifierProvider.notifier).setCategory(lv3);
+//     },
+//   );
+// });
 
 final marketplaceSyncProvider = Provider<void>((ref) {
   ref.listen<Marketplaces?>(

@@ -6,4 +6,13 @@ enum Marketplaces {
   final String dataPath;
 
   const Marketplaces(this.displayName, this.dataPath);
+
+  static Marketplaces fromString(String? str) {
+    switch ((str ?? '').toLowerCase()) {
+      case ('shopee'):
+        return Marketplaces.shopee;
+      default:
+        return Marketplaces.tokopedia;
+    }
+  }
 }

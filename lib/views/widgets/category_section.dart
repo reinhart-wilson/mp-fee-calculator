@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mp_calculator/controllers/category_selection_provider.dart';
+import 'package:mp_calculator/controllers/category_selection_mode_provider.dart';
 import 'package:mp_calculator/views/widgets/category_hierarchy_dropdowns.dart';
 import 'package:mp_calculator/views/widgets/base_widgets/section_card.dart';
 import 'package:mp_calculator/views/widgets/category_searchable_dropdowns.dart';

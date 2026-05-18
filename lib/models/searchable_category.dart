@@ -42,4 +42,14 @@ class SearchableCategory {
         "cat_lv3": catLv3,
         "fees": fees.toJson(),
       };
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! SearchableCategory) return false;
+
+    return label == other.label && fees == other.fees;
+  }
+
+  @override
+  int get hashCode => Object.hash(label, fees);
 }

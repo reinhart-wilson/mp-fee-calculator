@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:mp_calculator/extensions/string_extensions.dart';
 import 'package:mp_calculator/utils/formatter.dart';
 
@@ -36,6 +37,15 @@ abstract class Fee {
   }
 
   String get hint;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! Fee) return false;
+    return _name == other._name && _isMandatory == other._isMandatory;
+  }
+
+  @override
+  int get hashCode => Object.hash(_name, _isMandatory);
 }
 
 class MultiplierFee extends Fee {

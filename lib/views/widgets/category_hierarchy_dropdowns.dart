@@ -11,7 +11,7 @@ class CategoryHierarchyDropdowns extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(categorySyncProvider);
+    // ref.watch(categorySyncProvider);
 
     final categoryTreeAsync = ref.watch(categoryTreeProvider);
     final categoryLv2 = ref.watch(categoryLv2Provider);
