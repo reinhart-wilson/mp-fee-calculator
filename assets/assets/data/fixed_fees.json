@@ -18,6 +18,11 @@
             "is_flat": false,
             "is_mandatory": false,
             "group": "XBP"
+        },
+        "PPh 22": {
+            "amount": 0.005,
+            "is_flat": false,
+            "is_mandatory": false,
         }
     },
     "shopee": {
@@ -39,6 +44,11 @@
             "is_mandatory": false
         },
         "asuransi_pengiriman": {
+            "amount": 0.005,
+            "is_flat": false,
+            "is_mandatory": false
+        }, 
+        "PPh 22": {
             "amount": 0.005,
             "is_flat": false,
             "is_mandatory": false
