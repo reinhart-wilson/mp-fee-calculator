@@ -22,7 +22,7 @@
         "PPh_22": {
             "amount": 0.005,
             "is_flat": false,
-            "is_mandatory": false,
+            "is_mandatory": false
         }
     },
     "shopee": {
